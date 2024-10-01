@@ -10,13 +10,13 @@ import { SwcFileTransformer } from "./compilers/swc/swc-file-transformer";
 import { ExtraOptions } from "./interfaces";
 import { isTruthy } from "../utils/helpers";
 import { treeKillSync } from "../utils/tree-kill";
+import * as killProcess from "tree-kill";
 
 export class StartServerCommand {
   protected readonly configurationLoader = new ConfigurationLoader();
   protected readonly tsConfigLoader = new TsConfigLoader();
 
   async handle(options: Record<string, any>): Promise<void> {
-    console.log(options);
     const { watch = false, debug = false, typeCheck } = options;
 
     const intentConfigFilePath = this.configurationLoader.getFilePath();
@@ -123,7 +123,4 @@ export class StartServerCommand {
       shell: true,
     });
   }
-}
-function killProcess(pid: any) {
-  throw new Error("Function not implemented.");
 }

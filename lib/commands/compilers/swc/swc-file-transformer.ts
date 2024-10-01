@@ -2,7 +2,7 @@ import { dirname, join } from "path";
 import { defaultSwcOptionsFactory } from "./default-options";
 import { transformFileSync } from "@swc/core";
 import { mkdirSync, writeFileSync } from "fs-extra";
-import chokidar from "chokidar";
+import * as chokidar from "chokidar";
 import { fork } from "child_process";
 import { ExtraOptions } from "../../interfaces";
 import { TsConfigLoader } from "../../tsconfig-loader";

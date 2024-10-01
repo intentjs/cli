@@ -11,7 +11,22 @@ export class ForkedTypeCheckerHost {
     this.typeChecker.runInWatchMode(tsConfigPath, {
       watch: extras.watch,
       onProgramInit: (program: ts.Program) => {},
-      onTypeCheck: (program: ts.Program) => {},
+      onTypeCheck: (program: ts.Program) => {
+        const diagnostics = ts.getPreEmitDiagnostics(program);
+        const formatDiagnosticsHost: ts.FormatDiagnosticsHost = {
+          getCanonicalFileName: (path) => path,
+          getCurrentDirectory: ts.sys.getCurrentDirectory,
+          getNewLine: () => ts.sys.newLine,
+        };
+
+        console.log("printing the formatted diagnostic");
+        console.log(
+          ts.formatDiagnosticsWithColorAndContext(
+            diagnostics,
+            formatDiagnosticsHost
+          )
+        );
+      },
     });
   }
 }

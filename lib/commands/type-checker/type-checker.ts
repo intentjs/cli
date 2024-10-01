@@ -27,24 +27,26 @@ export class TypeCheckerHost {
     let watchProgram: ts.WatchOfConfigFile<ts.BuilderProgram> | undefined =
       undefined;
 
+    const origDiagnosticReporter = (ts as any).createDiagnosticReporter(
+      ts.sys,
+      true
+    );
+
     const host = ts.createWatchCompilerHost(
       tsConfigPath,
       { ...tsConfig.compilerOptions, preserveWatchOutput: true, noEmit: true },
       ts.sys,
       undefined,
-      (disagnostic: ts.Diagnostic) => {
-        console.log("inside diagnostic222 trrepoorting= ==>");
-        console.log(disagnostic);
-      },
+      origDiagnosticReporter,
       (
         diagnostic: ts.Diagnostic,
         newLine: string,
         compilerOptions: ts.CompilerOptions,
         errorCount?: number
       ) => {
-        console.log(diagnostic, newLine, compilerOptions, errorCount);
+        errorCount = errorCount || 0;
 
-        if ((errorCount || 0) > 0) {
+        if (errorCount > 0) {
           console.log(TSC_LOG_PREFIX, pc.red(diagnostic.messageText as string));
         }
 
