@@ -22,20 +22,22 @@ export class StartServerCommand {
       watch = false,
       debug = false,
       disableTypeCheck,
-      path,
+      config,
       tsconfig,
+      port,
     } = options;
 
-    const intentConfigFilePath = this.configurationLoader.loadPath(path);
+    const intentConfigFilePath = this.configurationLoader.loadPath(config);
     const intentFileConfig =
       this.configurationLoader.load(intentConfigFilePath);
 
     const tsConfig = this.tsConfigLoader.load(tsconfig);
 
-    const extraOptions = {
+    const extraOptions: ExtraOptions = {
       watch,
       typeCheck: !isTruthy(disableTypeCheck),
       debug,
+      port,
     };
 
     const swcOptions = defaultSwcOptionsFactory(
@@ -77,7 +79,8 @@ export class StartServerCommand {
             intentConfiguration.sourceRoot,
             extraOptions.debug,
             tsOptions.outDir as string,
-            "node"
+            "node",
+            extraOptions
           );
           childProcessRef.on("exit", () => (childProcessRef = undefined));
         });
@@ -89,7 +92,8 @@ export class StartServerCommand {
           intentConfiguration.sourceRoot,
           extraOptions.debug,
           tsOptions.outDir as string,
-          "node"
+          "node",
+          extraOptions
         );
         childProcessRef.on("exit", (code: number) => {
           process.exitCode = code;
@@ -104,7 +108,8 @@ export class StartServerCommand {
     sourceRoot: string,
     debug: boolean | string | undefined,
     outDirName: string,
-    binaryToRun: string
+    binaryToRun: string,
+    extraOptions: ExtraOptions
   ) {
     let outputFilePath = join(outDirName, sourceRoot, entryFile);
     if (!existsSync(outputFilePath + ".js")) {
@@ -114,15 +119,16 @@ export class StartServerCommand {
     let childProcessArgs: string[] = [];
     const argsStartIndex = process.argv.indexOf("--");
     if (argsStartIndex >= 0) {
-      // Prevents the need for users to double escape strings
-      // i.e. I can run the more natural
-      //   nest start -- '{"foo": "bar"}'
-      // instead of
-      //   nest start -- '\'{"foo": "bar"}\''
       childProcessArgs = process.argv
         .slice(argsStartIndex + 1)
         .map((arg) => JSON.stringify(arg));
     }
+
+    extraOptions.debug &&
+      childProcessArgs.push(`--debug=${extraOptions.debug}`);
+
+    extraOptions.port && childProcessArgs.push(`--port=${extraOptions.port}`);
+
     outputFilePath =
       outputFilePath.indexOf(" ") >= 0 ? `"${outputFilePath}"` : outputFilePath;
 
