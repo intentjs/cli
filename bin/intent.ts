@@ -3,7 +3,7 @@ import { StartServerCommand } from "../lib/commands/start-server";
 import { BuildCommand } from "../lib/commands/build";
 
 program
-  .command("dev")
+  .command("start")
   .description("Command to start the dev server")
   .option("-p, --path [path]", "Path to the .intentrc file.")
   .option("-t, --tsconfig [path]", "Path to tsconfig file.")
