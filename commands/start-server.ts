@@ -2,15 +2,15 @@ import * as ts from "typescript";
 import { join } from "path";
 import { existsSync } from "fs";
 import { spawn } from "child_process";
-import { isTruthy } from "../utils/helpers";
-import { treeKillSync } from "../utils/tree-kill";
 import * as killProcess from "tree-kill";
-import { ConfigurationLoader } from "../configuration/configuration-loader";
-import { defaultSwcOptionsFactory } from "../swc/default-options";
-import { SwcFileTransformer } from "../swc/swc-file-transformer";
-import { ConfigurationInterface } from "../configuration/interface";
-import { ExtraOptions } from "../interfaces";
-import { TsConfigLoader } from "../typescript/tsconfig-loader";
+import { ConfigurationLoader } from "../lib/configuration/configuration-loader";
+import { ConfigurationInterface } from "../lib/configuration/interface";
+import { ExtraOptions } from "../lib/interfaces";
+import { defaultSwcOptionsFactory } from "../lib/swc/default-options";
+import { SwcFileTransformer } from "../lib/swc/swc-file-transformer";
+import { TsConfigLoader } from "../lib/typescript/tsconfig-loader";
+import { isTruthy } from "../lib/utils/helpers";
+import { treeKillSync } from "../lib/utils/tree-kill";
 
 export class StartServerCommand {
   protected readonly configurationLoader = new ConfigurationLoader();

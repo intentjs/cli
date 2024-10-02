@@ -1,6 +1,8 @@
+#!/usr/bin/env node
+
 import { program } from "commander";
-import { StartServerCommand } from "../lib/commands/start-server";
-import { BuildCommand } from "../lib/commands/build";
+import { StartServerCommand } from "../commands/start-server";
+import { BuildCommand } from "../commands/build";
 
 program
   .command("start")

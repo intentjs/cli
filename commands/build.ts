@@ -1,8 +1,8 @@
-import { ConfigurationLoader } from "../configuration/configuration-loader";
-import { defaultSwcOptionsFactory } from "../swc/default-options";
-import { SwcFileTransformer } from "../swc/swc-file-transformer";
-import { TsConfigLoader } from "../typescript/tsconfig-loader";
-import { isTruthy } from "../utils/helpers";
+import { ConfigurationLoader } from "../lib/configuration/configuration-loader";
+import { defaultSwcOptionsFactory } from "../lib/swc/default-options";
+import { SwcFileTransformer } from "../lib/swc/swc-file-transformer";
+import { TsConfigLoader } from "../lib/typescript/tsconfig-loader";
+import { isTruthy } from "../lib/utils/helpers";
 
 export class BuildCommand {
   protected readonly configurationLoader = new ConfigurationLoader();
