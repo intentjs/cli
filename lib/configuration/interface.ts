@@ -1,6 +1,7 @@
 export type ConfigurationInterface = {
   sourceRoot: string;
-  entryFile: string;
+  containerFile: string;
+  serverFile: string;
   debug?: boolean;
   buildOptions?: {
     deleteOutDir: boolean;

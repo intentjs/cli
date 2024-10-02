@@ -1,7 +1,8 @@
 export const defaultIntentConfiguration = () => {
   return {
     sourceRoot: "app",
-    entryFile: "main",
+    containerFile: "main",
+    serverFile: "server",
     debug: true,
     buildOptions: { deleteOutDir: true },
     swc: { configPath: ".swcrc" },
