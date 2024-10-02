@@ -62,7 +62,7 @@ export class SwcFileTransformer {
     onSuccessHook?: () => void
   ) {
     const { include = [] } = tsConfig;
-
+    const fileTransformationPromises = [];
     for (const filePath of include) {
       const { code, map } = transformFileSync(filePath, {
         sourceMaps: true,

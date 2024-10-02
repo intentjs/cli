@@ -17,9 +17,9 @@ export class StartServerCommand {
   protected readonly tsConfigLoader = new TsConfigLoader();
 
   async handle(options: Record<string, any>): Promise<void> {
-    const { watch = false, debug = false, typeCheck } = options;
+    const { watch = false, debug = false, typeCheck, path } = options;
 
-    const intentConfigFilePath = this.configurationLoader.getFilePath();
+    const intentConfigFilePath = this.configurationLoader.getFilePath(path);
     const intentFileConfig =
       this.configurationLoader.load(intentConfigFilePath);
 
@@ -43,7 +43,7 @@ export class StartServerCommand {
     await swcTransformer.run(tsConfig, swcOptions, extraOptions, onSuccessHook);
   }
 
-  createOnSuccessHook(
+  private createOnSuccessHook(
     intentConfiguration: ConfigurationInterface,
     tsOptions: ts.CompilerOptions,
     extraOptions: ExtraOptions
