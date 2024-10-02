@@ -1,6 +1,6 @@
 {
   "name": "@intentjs/cli",
-  "version": "0.0.4-beta",
+  "version": "0.0.5-beta",
   "description": "Helper commands for building Intent application.",
   "repository": {
     "type": "git",
