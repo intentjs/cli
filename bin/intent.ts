@@ -5,7 +5,7 @@ import { StartServerCommand } from "../commands/start-server";
 import { BuildCommand } from "../commands/build";
 
 program
-  .command("start")
+  .command("dev")
   .description("Command to start the dev server")
   .option("-p, --port [port]", "Port to run the server on.")
   .option("-c, --config [path]", "Path to the .intentrc file.")
