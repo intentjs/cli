@@ -1,3 +1,4 @@
+import { Options } from "@swc/core";
 import { ConfigurationInterface } from "../configuration/interface";
 import { ExtraOptions } from "../interfaces";
 
@@ -5,46 +6,34 @@ export const defaultSwcOptionsFactory = (
   tsOptions: Record<string, any>,
   configuration: ConfigurationInterface,
   extras: ExtraOptions
-) => {
+): Options => {
   return {
-    swcOptions: {
-      sourceMaps:
-        tsOptions?.sourceMap || (tsOptions?.inlineSourceMap && "inline"),
-      module: {
-        type: "commonjs",
-      },
-      exclude: ["node_modules", "dist"],
-      jsc: {
-        target: "es2021",
-        parser: {
-          syntax: "typescript",
-          tsx: true,
-          decorators: true,
-          dynamicImport: true,
-        },
-        transform: {
-          legacyDecorator: true,
-          decoratorMetadata: true,
-          useDefineForClassFields: false,
-        },
-        keepClassNames: true,
-        baseUrl: tsOptions?.compilerOptions?.baseUrl,
-        paths: tsOptions?.compilerOptions?.paths,
-      },
-      minify: false,
-      swcrc: true,
+    sourceMaps:
+      tsOptions?.compilerOptions?.sourceMap ||
+      (tsOptions?.inlineSourceMap && "inline"),
+    module: {
+      type: "commonjs",
     },
-    cliOptions: {
-      outDir: tsOptions?.outDir ? convertPath(tsOptions.outDir) : "dist",
-      filenames: tsOptions.include,
-      sync: false,
-      extensions: [".js", ".ts", ".tsx"],
-      copyFiles: false,
-      includeDotfiles: false,
-      quiet: false,
-      watch: extras.watch,
-      stripLeadingPaths: true,
+    exclude: ["node_modules", "dist"],
+    jsc: {
+      target: "es2021",
+      parser: {
+        syntax: "typescript",
+        tsx: true,
+        decorators: true,
+        dynamicImport: true,
+      },
+      transform: {
+        legacyDecorator: true,
+        decoratorMetadata: true,
+        useDefineForClassFields: false,
+      },
+      keepClassNames: true,
+      baseUrl: tsOptions?.compilerOptions?.baseUrl,
+      paths: tsOptions?.compilerOptions?.paths,
     },
+    minify: false,
+    swcrc: true,
   };
 };
 

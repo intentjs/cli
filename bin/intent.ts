@@ -1,5 +1,6 @@
 import { program } from "commander";
 import { StartServerCommand } from "../lib/commands/start-server";
+import { BuildCommand } from "../lib/commands/build";
 
 program
   .command("dev")
@@ -33,5 +34,7 @@ program
   )
   .action((str) => {
     console.log(str);
+    const buildCommand = new BuildCommand();
+    buildCommand.handle(str);
   });
 program.parseAsync();

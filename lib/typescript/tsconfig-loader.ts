@@ -8,6 +8,17 @@ const TSCONFIG_BUILD_JSON = "tsconfig.build.json";
 const TSCONFIG_JSON = "tsconfig.json";
 
 export class TsConfigLoader {
+  loadCliOptions(customPath?: string) {
+    const configPath = this.loadPath(customPath);
+    const parsedCmd = ts.getParsedCommandLineOfConfigFile(
+      configPath,
+      undefined!,
+      ts.sys as unknown as ts.ParseConfigFileHost
+    );
+    const { options, fileNames, projectReferences } = parsedCmd!;
+    return { options, fileNames, projectReferences };
+  }
+
   load(customPath?: string): Record<string, any> {
     const configPath = this.loadPath(customPath);
 

@@ -1,15 +1,19 @@
 import { dirname, join } from "path";
 import { defaultSwcOptionsFactory } from "./default-options";
-import { transformFileSync } from "@swc/core";
+import { transformFile, transformFileSync } from "@swc/core";
 import { mkdirSync, writeFileSync } from "fs-extra";
 import * as chokidar from "chokidar";
 import { fork } from "child_process";
 import { ExtraOptions } from "../interfaces";
 import { treeKillSync } from "../utils/tree-kill";
 import { TsConfigLoader } from "../typescript/tsconfig-loader";
+import { debounce } from "radash";
+import { TypeCheckerHost } from "../type-checker/type-checker";
+import ts = require("typescript");
 
 export class SwcFileTransformer {
   tsConfigLoader = new TsConfigLoader();
+  typeCheckerHost = new TypeCheckerHost();
 
   async run(
     tsConfig: Record<string, any>,
@@ -19,29 +23,32 @@ export class SwcFileTransformer {
   ): Promise<void> {
     if (extras.watch) {
       if (extras.typeCheck) {
-        const tsConfigPath = this.tsConfigLoader.loadPath();
-        this.runTypeCheck(tsConfigPath, extras);
+        await this.runTypeCheck(extras);
       }
 
-      this.transformFiles(tsConfig, options, extras, onSuccessHook);
-      this.watchIncludedFiles(tsConfig, () =>
+      await this.transformFiles(tsConfig, options, extras, onSuccessHook);
+
+      const delayedOnChange = debounce({ delay: 100 }, () =>
         this.transformFiles(tsConfig, options, extras, onSuccessHook)
       );
+
+      this.watchIncludedFiles(tsConfig, delayedOnChange);
     } else {
       if (extras.typeCheck) {
-        const tsConfigPath = this.tsConfigLoader.loadPath();
-        this.runTypeCheck(tsConfigPath, extras);
+        await this.runTypeCheck(extras);
       }
 
-      this.transformFiles(tsConfig, options, extras, onSuccessHook);
+      await this.transformFiles(tsConfig, options, extras, onSuccessHook);
     }
   }
 
-  runTypeCheck(tsConfigPath: string, extras: ExtraOptions) {
+  async runTypeCheck(extras: ExtraOptions): Promise<void> {
+    const tsConfigPath = this.tsConfigLoader.loadPath();
+
     if (extras.watch) {
       const args = [tsConfigPath, JSON.stringify(extras)];
       const childProcess = fork(
-        join(__dirname, "../../type-checker/forked-type-checker.js"),
+        join(__dirname, "../type-checker/forked-type-checker.js"),
         args,
         { cwd: process.cwd() }
       );
@@ -51,11 +58,18 @@ export class SwcFileTransformer {
         () => childProcess && treeKillSync(childProcess.pid as number)
       );
     } else {
-      console.log("running type checker in non-watch mode");
+      const cb = (resolve: Function) =>
+        this.typeCheckerHost.runOnce(tsConfigPath, {
+          watch: false,
+          onTypeCheck: (program: ts.Program) => {
+            resolve(true);
+          },
+        });
+      return new Promise((resolve) => cb(resolve));
     }
   }
 
-  transformFiles(
+  async transformFiles(
     tsConfig: Record<string, any>,
     options: ReturnType<typeof defaultSwcOptionsFactory>,
     extras: ExtraOptions,
@@ -63,53 +77,39 @@ export class SwcFileTransformer {
   ) {
     const { include = [] } = tsConfig;
     const fileTransformationPromises = [];
+
     for (const filePath of include) {
-      const { code, map } = transformFileSync(filePath, {
-        sourceMaps: true,
-        module: {
-          type: "commonjs",
-        },
-        jsc: {
-          target: "es2021",
-          parser: {
-            syntax: "typescript",
-            tsx: true,
-            decorators: true,
-            dynamicImport: true,
-          },
-          transform: {
-            legacyDecorator: true,
-            decoratorMetadata: true,
-            useDefineForClassFields: false,
-          },
-          keepClassNames: true,
-          baseUrl: tsConfig.compilerOptions.baseUrl,
-          paths: tsConfig?.compilerOptions?.paths,
-        },
-        filename: filePath,
-        minify: false,
-        swcrc: true,
-      });
+      const newP = (resolve: Function) =>
+        transformFile(filePath, { ...options, filename: filePath })
+          .then(({ code, map }) => {
+            const distFilePath = join(
+              tsConfig.compilerOptions.outDir,
+              filePath.replace(join(tsConfig.compilerOptions.baseUrl, "/"), "")
+            ).replace(join(tsConfig.compilerOptions.baseUrl, "/"), "");
 
-      const distFilePath = join(
-        tsConfig.compilerOptions.outDir,
-        filePath.replace(join(tsConfig.compilerOptions.baseUrl, "/"), "")
-      ).replace(join(tsConfig.compilerOptions.baseUrl, "/"), "");
+            const codeFilePath = join(
+              process.cwd(),
+              distFilePath.replace(/\.ts$/, ".js").replace(/\.tsx$/, ".js")
+            );
+            mkdirSync(dirname(codeFilePath), { recursive: true });
+            writeFileSync(codeFilePath, code);
 
-      const codeFilePath = distFilePath
-        .replace(/\.ts$/, ".js")
-        .replace(/\.tsx$/, ".js");
+            if (options.sourceMaps) {
+              const mapFilePath = distFilePath
+                .replace(/\.ts$/, ".js.map")
+                .replace(/\.tsx$/, ".js.map");
+              writeFileSync(mapFilePath, map as string);
+            }
+            resolve(1);
+          })
+          .catch((err) => {
+            console.log("caaughty error ===> ", err);
+          });
 
-      mkdirSync(dirname(codeFilePath), { recursive: true });
-      writeFileSync(codeFilePath, code);
-
-      if (options.swcOptions.sourceMaps) {
-        const mapFilePath = distFilePath
-          .replace(/\.ts$/, ".js.map")
-          .replace(/\.tsx$/, ".js.map");
-        writeFileSync(mapFilePath, map as string);
-      }
+      fileTransformationPromises.push(new Promise(newP));
     }
+
+    await Promise.allSettled(fileTransformationPromises);
 
     onSuccessHook && onSuccessHook();
   }

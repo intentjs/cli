@@ -1,6 +1,7 @@
 import * as ts from "typescript";
 import * as pc from "picocolors";
 import { TSC_LOG_PREFIX } from "../utils/log-helpers";
+import { TsConfigLoader } from "../typescript/tsconfig-loader";
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
@@ -11,12 +12,44 @@ export type TypeCheckerOptions = {
 };
 
 export class TypeCheckerHost {
-  run(
-    tsConfigPath: string,
-    tsConfig: Record<string, any>,
-    options?: TypeCheckerOptions
-  ) {
-    console.log(tsConfigPath, tsConfig, options);
+  private tsConfigLoader = new TsConfigLoader();
+  runOnce(tsConfigPath: string, options?: TypeCheckerOptions) {
+    const {
+      options: tsOptions,
+      fileNames,
+      projectReferences,
+    } = this.tsConfigLoader.loadCliOptions(tsConfigPath);
+
+    const createProgram = ts.createIncrementalProgram ?? ts.createProgram;
+
+    const program = createProgram.call(ts, {
+      rootNames: fileNames,
+      projectReferences,
+      options: tsOptions,
+    });
+
+    const programRef = program.getProgram
+      ? program.getProgram()
+      : (program as any as ts.Program);
+
+    const diagnostics = ts.getPreEmitDiagnostics(programRef);
+    if (diagnostics.length > 0) {
+      const formatDiagnosticsHost: ts.FormatDiagnosticsHost = {
+        getCanonicalFileName: (path) => path,
+        getCurrentDirectory: ts.sys.getCurrentDirectory,
+        getNewLine: () => ts.sys.newLine,
+      };
+
+      console.log();
+      console.log(
+        ts.formatDiagnosticsWithColorAndContext(
+          diagnostics,
+          formatDiagnosticsHost
+        )
+      );
+      process.exit(1);
+    }
+    options?.onTypeCheck?.(programRef);
   }
 
   runInWatchMode(

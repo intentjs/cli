@@ -15,6 +15,7 @@ import { TsConfigLoader } from "../typescript/tsconfig-loader";
 export class StartServerCommand {
   protected readonly configurationLoader = new ConfigurationLoader();
   protected readonly tsConfigLoader = new TsConfigLoader();
+  protected readonly swcFileTransformer = new SwcFileTransformer();
 
   async handle(options: Record<string, any>): Promise<void> {
     const {
@@ -49,8 +50,12 @@ export class StartServerCommand {
       extraOptions
     );
 
-    const swcTransformer = new SwcFileTransformer();
-    await swcTransformer.run(tsConfig, swcOptions, extraOptions, onSuccessHook);
+    await this.swcFileTransformer.run(
+      tsConfig,
+      swcOptions,
+      extraOptions,
+      onSuccessHook
+    );
   }
 
   private createOnSuccessHook(
