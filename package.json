@@ -1,16 +1,28 @@
 {
   "name": "@intentjs/cli",
   "version": "0.0.1",
-  "description": "CLI tool for IntentJS application",
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc"
+  "description": "Helper commands for building Intent application.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/intentjs/cli.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/intentjs/cli/issues"
+  },
+  "homepage": "https://github.com/intentjs/cli#readme",
+  "author": "Vinayak Sarawagi <vinayaksarawagi25@gmail.com>",
+  "engines": {
+    "node": ">= 16.14"
   },
   "bin": {
     "intent": "./dist/bin/intent.js"
   },
-  "author": "",
-  "license": "ISC",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "prepublish:npm": "npm run build",
+    "publish:npm": "npm publish --access public"
+  },
   "dependencies": {
     "commander": "^12.1.0",
     "enquirer": "^2.4.1",
