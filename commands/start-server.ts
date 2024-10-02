@@ -1,31 +1,44 @@
 import * as ts from "typescript";
 import { join } from "path";
 import { existsSync } from "fs";
-import { ConfigurationInterface } from "./configuration/interface";
 import { spawn } from "child_process";
-import { defaultSwcOptionsFactory } from "./compilers/swc/default-options";
-import { ConfigurationLoader } from "./configuration/configuration-loader";
-import { TsConfigLoader } from "./tsconfig-loader";
-import { SwcFileTransformer } from "./compilers/swc/swc-file-transformer";
-import { ExtraOptions } from "./interfaces";
-import { isTruthy } from "../utils/helpers";
-import { treeKillSync } from "../utils/tree-kill";
+import * as killProcess from "tree-kill";
+import { ConfigurationLoader } from "../lib/configuration/configuration-loader";
+import { ConfigurationInterface } from "../lib/configuration/interface";
+import { ExtraOptions } from "../lib/interfaces";
+import { defaultSwcOptionsFactory } from "../lib/swc/default-options";
+import { SwcFileTransformer } from "../lib/swc/swc-file-transformer";
+import { TsConfigLoader } from "../lib/typescript/tsconfig-loader";
+import { isTruthy } from "../lib/utils/helpers";
+import { treeKillSync } from "../lib/utils/tree-kill";
 
 export class StartServerCommand {
   protected readonly configurationLoader = new ConfigurationLoader();
   protected readonly tsConfigLoader = new TsConfigLoader();
+  protected readonly swcFileTransformer = new SwcFileTransformer();
 
   async handle(options: Record<string, any>): Promise<void> {
-    console.log(options);
-    const { watch = false, debug = false, typeCheck } = options;
+    const {
+      watch = false,
+      debug = false,
+      disableTypeCheck,
+      config,
+      tsconfig,
+      port,
+    } = options;
 
-    const intentConfigFilePath = this.configurationLoader.getFilePath();
+    const intentConfigFilePath = this.configurationLoader.loadPath(config);
     const intentFileConfig =
       this.configurationLoader.load(intentConfigFilePath);
 
-    const tsConfig = this.tsConfigLoader.load();
+    const tsConfig = this.tsConfigLoader.load(tsconfig);
 
-    const extraOptions = { watch, typeCheck: isTruthy(typeCheck), debug };
+    const extraOptions: ExtraOptions = {
+      watch,
+      typeCheck: !isTruthy(disableTypeCheck),
+      debug,
+      port,
+    };
 
     const swcOptions = defaultSwcOptionsFactory(
       tsConfig,
@@ -39,11 +52,15 @@ export class StartServerCommand {
       extraOptions
     );
 
-    const swcTransformer = new SwcFileTransformer();
-    await swcTransformer.run(tsConfig, swcOptions, extraOptions, onSuccessHook);
+    await this.swcFileTransformer.run(
+      tsConfig,
+      swcOptions,
+      extraOptions,
+      onSuccessHook
+    );
   }
 
-  createOnSuccessHook(
+  private createOnSuccessHook(
     intentConfiguration: ConfigurationInterface,
     tsOptions: ts.CompilerOptions,
     extraOptions: ExtraOptions
@@ -62,7 +79,8 @@ export class StartServerCommand {
             intentConfiguration.sourceRoot,
             extraOptions.debug,
             tsOptions.outDir as string,
-            "node"
+            "node",
+            extraOptions
           );
           childProcessRef.on("exit", () => (childProcessRef = undefined));
         });
@@ -74,7 +92,8 @@ export class StartServerCommand {
           intentConfiguration.sourceRoot,
           extraOptions.debug,
           tsOptions.outDir as string,
-          "node"
+          "node",
+          extraOptions
         );
         childProcessRef.on("exit", (code: number) => {
           process.exitCode = code;
@@ -89,7 +108,8 @@ export class StartServerCommand {
     sourceRoot: string,
     debug: boolean | string | undefined,
     outDirName: string,
-    binaryToRun: string
+    binaryToRun: string,
+    extraOptions: ExtraOptions
   ) {
     let outputFilePath = join(outDirName, sourceRoot, entryFile);
     if (!existsSync(outputFilePath + ".js")) {
@@ -99,15 +119,16 @@ export class StartServerCommand {
     let childProcessArgs: string[] = [];
     const argsStartIndex = process.argv.indexOf("--");
     if (argsStartIndex >= 0) {
-      // Prevents the need for users to double escape strings
-      // i.e. I can run the more natural
-      //   nest start -- '{"foo": "bar"}'
-      // instead of
-      //   nest start -- '\'{"foo": "bar"}\''
       childProcessArgs = process.argv
         .slice(argsStartIndex + 1)
         .map((arg) => JSON.stringify(arg));
     }
+
+    extraOptions.debug &&
+      childProcessArgs.push(`--debug=${extraOptions.debug}`);
+
+    extraOptions.port && childProcessArgs.push(`--port=${extraOptions.port}`);
+
     outputFilePath =
       outputFilePath.indexOf(" ") >= 0 ? `"${outputFilePath}"` : outputFilePath;
 
@@ -123,7 +144,4 @@ export class StartServerCommand {
       shell: true,
     });
   }
-}
-function killProcess(pid: any) {
-  throw new Error("Function not implemented.");
 }
