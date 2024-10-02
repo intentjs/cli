@@ -36,7 +36,6 @@ export class BuildCommand {
       extraOptions
     );
 
-    console.log(swcOptions);
     await this.swcFileTransformer.run(tsConfig, swcOptions, extraOptions);
   }
 }

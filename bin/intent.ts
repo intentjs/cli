@@ -35,7 +35,6 @@ program
     "Disable type checking. Enabled by default"
   )
   .action((str) => {
-    console.log(str);
     const buildCommand = new BuildCommand();
     buildCommand.handle(str);
   });

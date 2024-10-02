@@ -102,9 +102,7 @@ export class SwcFileTransformer {
             }
             resolve(1);
           })
-          .catch((err) => {
-            console.log("caaughty error ===> ", err);
-          });
+          .catch((err) => {});
 
       fileTransformationPromises.push(new Promise(newP));
     }

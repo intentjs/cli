@@ -19,7 +19,6 @@ export class ForkedTypeCheckerHost {
           getNewLine: () => ts.sys.newLine,
         };
 
-        console.log("printing the formatted diagnostic");
         console.log(
           ts.formatDiagnosticsWithColorAndContext(
             diagnostics,

@@ -1,6 +1,6 @@
 {
   "name": "@intentjs/cli",
-  "version": "0.0.2-beta",
+  "version": "0.0.3-beta",
   "description": "Helper commands for building Intent application.",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
     "node": ">= 16.14"
   },
   "bin": {
-    "intent": "./dist/bin/intent.js"
+    "intent": "bin/intent.js"
   },
   "scripts": {
     "build": "tsc",
