@@ -1,8 +1,8 @@
-import * as ts from "typescript";
+import ts from "typescript";
 import { join } from "path";
 import { existsSync } from "fs";
 import { spawn } from "child_process";
-import * as killProcess from "tree-kill";
+import killProcess from "tree-kill";
 import { ConfigurationLoader } from "../lib/configuration/configuration-loader";
 import { ConfigurationInterface } from "../lib/configuration/interface";
 import { ExtraOptions } from "../lib/interfaces";
@@ -75,7 +75,7 @@ export class StartServerCommand {
         childProcessRef.removeAllListeners("exit");
         childProcessRef.on("exit", () => {
           childProcessRef = this.spawnChildProcess(
-            intentConfiguration.entryFile,
+            intentConfiguration.serverFile,
             intentConfiguration.sourceRoot,
             extraOptions.debug,
             tsOptions.outDir as string,
@@ -88,7 +88,7 @@ export class StartServerCommand {
         killProcess(childProcessRef.pid);
       } else {
         childProcessRef = this.spawnChildProcess(
-          intentConfiguration.entryFile,
+          intentConfiguration.serverFile,
           intentConfiguration.sourceRoot,
           extraOptions.debug,
           tsOptions.outDir as string,
@@ -104,16 +104,16 @@ export class StartServerCommand {
   }
 
   private spawnChildProcess(
-    entryFile: string,
+    serverFile: string,
     sourceRoot: string,
     debug: boolean | string | undefined,
     outDirName: string,
     binaryToRun: string,
     extraOptions: ExtraOptions
   ) {
-    let outputFilePath = join(outDirName, sourceRoot, entryFile);
+    let outputFilePath = join(outDirName, sourceRoot, serverFile);
     if (!existsSync(outputFilePath + ".js")) {
-      outputFilePath = join(outDirName, entryFile);
+      outputFilePath = join(outDirName, serverFile);
     }
 
     let childProcessArgs: string[] = [];

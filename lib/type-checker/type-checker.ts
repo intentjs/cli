@@ -1,5 +1,5 @@
-import * as ts from "typescript";
-import * as pc from "picocolors";
+import ts from "typescript";
+import pc from "picocolors";
 import { TSC_DEBUG_LOG_PREFIX, TSC_LOG_PREFIX } from "../utils/log-helpers";
 import { TsConfigLoader } from "../typescript/tsconfig-loader";
 import { error } from "console";

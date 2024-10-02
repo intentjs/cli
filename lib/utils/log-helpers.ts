@@ -1,4 +1,4 @@
-import * as pc from "picocolors";
+import pc from "picocolors";
 import { getTime } from "./helpers";
 
 export const TIMESTAMP_LOG_PREFIX = pc.gray(`[${getTime()}] `);

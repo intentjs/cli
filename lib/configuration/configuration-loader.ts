@@ -4,7 +4,7 @@ import { join } from "path";
 import { defaultIntentConfiguration } from "./default-configuration";
 import { assign } from "radash";
 import { INTENT_LOG_PREFIX } from "../utils/log-helpers";
-import * as pc from "picocolors";
+import pc from "picocolors";
 
 export class ConfigurationLoader {
   load(filePath: string): ConfigurationInterface {

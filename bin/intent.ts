@@ -5,7 +5,7 @@ import { StartServerCommand } from "../commands/start-server";
 import { BuildCommand } from "../commands/build";
 
 program
-  .command("start")
+  .command("dev")
   .description("Command to start the dev server")
   .option("-p, --port [port]", "Port to run the server on.")
   .option("-c, --config [path]", "Path to the .intentrc file.")
@@ -28,9 +28,10 @@ program
 
 program
   .command("build")
-  .description("Description to build the application")
-  .option("-p, --path [path]", "Path to the .intentrc file.")
-  .option("-t, --tsconfig [path]", "Path to tsconfig file.")
+  .description("Command to build the application")
+  .option("-c, --config [path]", "Path to the .intentrc file.")
+  .option("-t, --tsconfig [tsConfigPath]", "Path to tsconfig file.")
+  .option("-d, --debug [hostport] ", "Run in debug mode (with --inspect flag).")
   .option(
     "-dtc, --disable-type-check",
     "Disable type checking. Enabled by default"
