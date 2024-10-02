@@ -8,24 +8,29 @@ export class ForkedTypeCheckerHost {
   private typeChecker = new TypeCheckerHost();
 
   run(tsConfigPath: string, extras: ExtraOptions) {
+    const onTypeCheckFunction = (program: ts.Program) => {
+      console.log("function running ===> ");
+      const diagnostics = ts.getPreEmitDiagnostics(program);
+      const formatDiagnosticsHost: ts.FormatDiagnosticsHost = {
+        getCanonicalFileName: (path) => path,
+        getCurrentDirectory: ts.sys.getCurrentDirectory,
+        getNewLine: () => ts.sys.newLine,
+      };
+
+      console.log(formatDiagnosticsHost);
+
+      console.log(
+        ts.formatDiagnosticsWithColorAndContext(
+          diagnostics,
+          formatDiagnosticsHost
+        )
+      );
+    };
+
     this.typeChecker.runInWatchMode(tsConfigPath, {
       watch: extras.watch,
-      onProgramInit: (program: ts.Program) => {},
-      onTypeCheck: (program: ts.Program) => {
-        const diagnostics = ts.getPreEmitDiagnostics(program);
-        const formatDiagnosticsHost: ts.FormatDiagnosticsHost = {
-          getCanonicalFileName: (path) => path,
-          getCurrentDirectory: ts.sys.getCurrentDirectory,
-          getNewLine: () => ts.sys.newLine,
-        };
-
-        console.log(
-          ts.formatDiagnosticsWithColorAndContext(
-            diagnostics,
-            formatDiagnosticsHost
-          )
-        );
-      },
+      onProgramInit: onTypeCheckFunction,
+      onTypeCheck: onTypeCheckFunction,
     });
   }
 }

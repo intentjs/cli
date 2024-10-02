@@ -10,6 +10,7 @@ import { TsConfigLoader } from "../typescript/tsconfig-loader";
 import { debounce } from "radash";
 import { TypeCheckerHost } from "../type-checker/type-checker";
 import ts = require("typescript");
+import { SWC_DEBUG_LOG_PREFIX } from "../utils/log-helpers";
 
 export class SwcFileTransformer {
   tsConfigLoader = new TsConfigLoader();
@@ -26,11 +27,17 @@ export class SwcFileTransformer {
         await this.runTypeCheck(extras);
       }
 
-      await this.transformFiles(tsConfig, options, extras, onSuccessHook);
+      await this.transformFiles(tsConfig, options, extras);
 
-      const delayedOnChange = debounce({ delay: 100 }, () =>
-        this.transformFiles(tsConfig, options, extras, onSuccessHook)
-      );
+      const delayedOnChange = debounce({ delay: 150 }, () => {
+        this.transformFiles(tsConfig, options, extras);
+        onSuccessHook && onSuccessHook();
+      });
+
+      if (onSuccessHook) {
+        const debouncedSuccess = debounce({ delay: 500 }, onSuccessHook);
+        debouncedSuccess();
+      }
 
       this.watchIncludedFiles(tsConfig, delayedOnChange);
     } else {
@@ -38,7 +45,7 @@ export class SwcFileTransformer {
         await this.runTypeCheck(extras);
       }
 
-      await this.transformFiles(tsConfig, options, extras, onSuccessHook);
+      await this.transformFiles(tsConfig, options, extras);
     }
   }
 
@@ -50,7 +57,7 @@ export class SwcFileTransformer {
       const childProcess = fork(
         join(__dirname, "../type-checker/forked-type-checker.js"),
         args,
-        { cwd: process.cwd() }
+        { cwd: process.cwd(), stdio: "inherit" }
       );
 
       process.on(
@@ -72,9 +79,9 @@ export class SwcFileTransformer {
   async transformFiles(
     tsConfig: Record<string, any>,
     options: ReturnType<typeof defaultSwcOptionsFactory>,
-    extras: ExtraOptions,
-    onSuccessHook?: () => void
+    extras: ExtraOptions
   ) {
+    const now = Date.now();
     const { include = [] } = tsConfig;
     const fileTransformationPromises = [];
 
@@ -109,7 +116,10 @@ export class SwcFileTransformer {
 
     await Promise.allSettled(fileTransformationPromises);
 
-    onSuccessHook && onSuccessHook();
+    console.log(
+      SWC_DEBUG_LOG_PREFIX,
+      `Successfully transpiled ${include.length} files in ${Date.now() - now}ms`
+    );
   }
 
   watchIncludedFiles(tsConfig: Record<string, any>, onChange: () => void) {

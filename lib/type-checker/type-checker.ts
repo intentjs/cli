@@ -1,7 +1,8 @@
 import * as ts from "typescript";
 import * as pc from "picocolors";
-import { TSC_LOG_PREFIX } from "../utils/log-helpers";
+import { TSC_DEBUG_LOG_PREFIX, TSC_LOG_PREFIX } from "../utils/log-helpers";
 import { TsConfigLoader } from "../typescript/tsconfig-loader";
+import { error } from "console";
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
@@ -65,27 +66,38 @@ export class TypeCheckerHost {
       true
     );
 
+    const callBack = (
+      diagnostic: ts.Diagnostic,
+      newLine: string,
+      compilerOptions: ts.CompilerOptions,
+      errorCount?: number
+    ) => {
+      errorCount = errorCount || 0;
+
+      if (errorCount > 0) {
+        console.log(TSC_LOG_PREFIX, pc.red(diagnostic.messageText as string));
+        return;
+      } else {
+        console.log(TSC_DEBUG_LOG_PREFIX, diagnostic.messageText);
+      }
+
+      if (!watchProgram) return;
+      options?.onTypeCheck?.(watchProgram.getProgram().getProgram());
+    };
+
     const host = ts.createWatchCompilerHost(
       tsConfigPath,
-      { ...tsConfig.compilerOptions, preserveWatchOutput: true, noEmit: true },
+      {
+        ...tsConfig.compilerOptions,
+        preserveWatchOutput: true,
+        noEmit: false,
+        emitDeclarationOnly: true,
+        experimentalDecorators: true,
+      },
       ts.sys,
       undefined,
       origDiagnosticReporter,
-      (
-        diagnostic: ts.Diagnostic,
-        newLine: string,
-        compilerOptions: ts.CompilerOptions,
-        errorCount?: number
-      ) => {
-        errorCount = errorCount || 0;
-
-        if (errorCount > 0) {
-          console.log(TSC_LOG_PREFIX, pc.red(diagnostic.messageText as string));
-        }
-
-        if (!watchProgram) return;
-        options?.onTypeCheck?.(watchProgram.getProgram().getProgram());
-      }
+      callBack
     );
 
     watchProgram = ts.createWatchProgram(host);
