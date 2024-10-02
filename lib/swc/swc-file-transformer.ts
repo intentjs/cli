@@ -6,7 +6,7 @@ import * as chokidar from "chokidar";
 import { fork } from "child_process";
 import { ExtraOptions } from "../interfaces";
 import { treeKillSync } from "../utils/tree-kill";
-import { TsConfigLoader } from "../commands/tsconfig-loader";
+import { TsConfigLoader } from "../typescript/tsconfig-loader";
 
 export class SwcFileTransformer {
   tsConfigLoader = new TsConfigLoader();
