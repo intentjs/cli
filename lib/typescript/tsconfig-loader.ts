@@ -1,7 +1,7 @@
 import { dirname } from "path";
-import * as ts from "typescript";
+import ts from "typescript";
 import { INTENT_LOG_PREFIX } from "../utils/log-helpers";
-import * as pc from "picocolors";
+import pc from "picocolors";
 import { NO_TSCONFIG_FOUND } from "../utils/messages";
 
 const TSCONFIG_BUILD_JSON = "tsconfig.build.json";

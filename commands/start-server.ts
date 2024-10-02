@@ -1,8 +1,8 @@
-import * as ts from "typescript";
+import ts from "typescript";
 import { join } from "path";
 import { existsSync } from "fs";
 import { spawn } from "child_process";
-import * as killProcess from "tree-kill";
+import killProcess from "tree-kill";
 import { ConfigurationLoader } from "../lib/configuration/configuration-loader";
 import { ConfigurationInterface } from "../lib/configuration/interface";
 import { ExtraOptions } from "../lib/interfaces";

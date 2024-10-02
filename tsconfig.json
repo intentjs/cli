@@ -6,6 +6,7 @@
     "skipLibCheck": true,
     "sourceMap": false,
     "strict": true,
+    "esModuleInterop": true,
     "useUnknownInCatchVariables": false,
     "types": ["node", "jest"]
   },

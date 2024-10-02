@@ -2,7 +2,7 @@ import { dirname, join } from "path";
 import { defaultSwcOptionsFactory } from "./default-options";
 import { transformFile, transformFileSync } from "@swc/core";
 import { mkdirSync, writeFileSync } from "fs-extra";
-import * as chokidar from "chokidar";
+import chokidar from "chokidar";
 import { fork } from "child_process";
 import { ExtraOptions } from "../interfaces";
 import { treeKillSync } from "../utils/tree-kill";
