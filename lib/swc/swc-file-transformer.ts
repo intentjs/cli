@@ -4,12 +4,13 @@ import { transformFileSync } from "@swc/core";
 import { mkdirSync, writeFileSync } from "fs-extra";
 import * as chokidar from "chokidar";
 import { fork } from "child_process";
-import { ExtraOptions } from "../../interfaces";
-import { TsConfigLoader } from "../../tsconfig-loader";
-import { treeKillSync } from "../../../utils/tree-kill";
+import { ExtraOptions } from "../interfaces";
+import { treeKillSync } from "../utils/tree-kill";
+import { TsConfigLoader } from "../commands/tsconfig-loader";
 
 export class SwcFileTransformer {
   tsConfigLoader = new TsConfigLoader();
+
   async run(
     tsConfig: Record<string, any>,
     options: ReturnType<typeof defaultSwcOptionsFactory>,

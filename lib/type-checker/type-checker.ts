@@ -1,6 +1,6 @@
 import * as ts from "typescript";
 import * as pc from "picocolors";
-import { TSC_LOG_PREFIX } from "../../utils/log-helpers";
+import { TSC_LOG_PREFIX } from "../utils/log-helpers";
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 

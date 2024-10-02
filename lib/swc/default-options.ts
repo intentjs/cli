@@ -1,5 +1,5 @@
-import { ConfigurationInterface } from "../../configuration/interface";
-import { ExtraOptions } from "../../interfaces";
+import { ConfigurationInterface } from "../configuration/interface";
+import { ExtraOptions } from "../interfaces";
 
 export const defaultSwcOptionsFactory = (
   tsOptions: Record<string, any>,
