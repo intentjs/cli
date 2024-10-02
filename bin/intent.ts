@@ -5,12 +5,12 @@ program
   .command("dev")
   .description("Command to start the dev server")
   .option("-p, --path [path]", "Path to the .intentrc file.")
-  // .option("-p, --path [path]", "Path to tsconfig file.")
+  .option("-t, --tsconfig [path]", "Path to tsconfig file.")
   .option("-w, --watch", "Run in watch mode (live-reload).")
   .option("-wa, --watch-assets", "Watch non-ts (e.g., .graphql) files mode.")
   .option("-d, --debug [hostport] ", "Run in debug mode (with --inspect flag).")
   .option(
-    "-t, --type-check [typeCheck]",
+    "-tc, --type-check [typeCheck]",
     "Enable type checking. Enabled by default"
   )
   .option(

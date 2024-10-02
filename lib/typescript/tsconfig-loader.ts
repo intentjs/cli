@@ -1,13 +1,15 @@
 import { dirname } from "path";
 import * as ts from "typescript";
+import { INTENT_LOG_PREFIX } from "../utils/log-helpers";
+import * as pc from "picocolors";
+import { NO_TSCONFIG_FOUND } from "../utils/messages";
+
+const TSCONFIG_BUILD_JSON = "tsconfig.build.json";
+const TSCONFIG_JSON = "tsconfig.json";
 
 export class TsConfigLoader {
-  load(): Record<string, any> {
-    const configPath = this.loadPath();
-
-    if (!configPath) {
-      throw new Error("Could not find a valid 'tsconfig.json'.");
-    }
+  load(customPath?: string): Record<string, any> {
+    const configPath = this.loadPath(customPath);
 
     const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
     const parsedConfig = ts.parseJsonConfigFileContent(
@@ -26,11 +28,28 @@ export class TsConfigLoader {
     };
   }
 
-  loadPath(): string {
-    return ts.findConfigFile(
-      process.cwd(),
-      ts.sys.fileExists,
-      "tsconfig.json"
-    ) as string;
+  loadPath(customPath?: string): string {
+    try {
+      const tsConfigFile = customPath || TSCONFIG_BUILD_JSON || TSCONFIG_JSON;
+
+      const configPath = ts.findConfigFile(
+        process.cwd(),
+        ts.sys.fileExists,
+        tsConfigFile
+      ) as string;
+
+      if (!configPath) {
+        console.log(
+          INTENT_LOG_PREFIX,
+          pc.red(NO_TSCONFIG_FOUND(`\`${tsConfigFile}\``))
+        );
+        process.exit();
+      }
+
+      return configPath;
+    } catch (e) {
+      console.log(INTENT_LOG_PREFIX, pc.red(e.message));
+      process.exit(1);
+    }
   }
 }

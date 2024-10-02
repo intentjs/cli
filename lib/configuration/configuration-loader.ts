@@ -19,7 +19,7 @@ export class ConfigurationLoader {
     }
   }
 
-  getFilePath(path?: string) {
+  loadPath(path?: string) {
     return join(process.cwd(), path || ".intentrc");
   }
 }
