@@ -26,7 +26,7 @@ export class TypeCheckerHost {
     const program = createProgram.call(ts, {
       rootNames: fileNames,
       projectReferences,
-      options: tsOptions,
+      options: { ...tsOptions, emitDeclarationOnly: true, noEmit: false },
     });
 
     const programRef = program.getProgram
