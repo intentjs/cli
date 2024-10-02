@@ -17,7 +17,13 @@ export class StartServerCommand {
   protected readonly tsConfigLoader = new TsConfigLoader();
 
   async handle(options: Record<string, any>): Promise<void> {
-    const { watch = false, debug = false, typeCheck, path, tsconfig } = options;
+    const {
+      watch = false,
+      debug = false,
+      disableTypeCheck,
+      path,
+      tsconfig,
+    } = options;
 
     const intentConfigFilePath = this.configurationLoader.loadPath(path);
     const intentFileConfig =
@@ -25,7 +31,11 @@ export class StartServerCommand {
 
     const tsConfig = this.tsConfigLoader.load(tsconfig);
 
-    const extraOptions = { watch, typeCheck: isTruthy(typeCheck), debug };
+    const extraOptions = {
+      watch,
+      typeCheck: !isTruthy(disableTypeCheck),
+      debug,
+    };
 
     const swcOptions = defaultSwcOptionsFactory(
       tsConfig,

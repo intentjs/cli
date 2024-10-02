@@ -10,8 +10,8 @@ program
   .option("-wa, --watch-assets", "Watch non-ts (e.g., .graphql) files mode.")
   .option("-d, --debug [hostport] ", "Run in debug mode (with --inspect flag).")
   .option(
-    "-tc, --type-check [typeCheck]",
-    "Enable type checking. Enabled by default"
+    "-dtc, --disable-type-check",
+    "Disable type checking. Enabled by default"
   )
   .option(
     "--preserveWatchOutput",
@@ -25,10 +25,11 @@ program
 program
   .command("build")
   .description("Description to build the application")
-  .option("-p, --path [path]", "Path to tsconfig file.")
+  .option("-p, --path [path]", "Path to the .intentrc file.")
+  .option("-t, --tsconfig [path]", "Path to tsconfig file.")
   .option(
-    "-t, --type-check [typeCheck]",
-    "Enable type checking. Enabled by default"
+    "-dtc, --disable-type-check",
+    "Disable type checking. Enabled by default"
   )
   .action((str) => {
     console.log(str);
