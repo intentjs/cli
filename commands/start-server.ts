@@ -23,7 +23,7 @@ export class StartServerCommand {
       debug = false,
       disableTypeCheck,
       config,
-      tsconfig,
+      tsconfig: tsConfigPath,
       port,
     } = options;
 
@@ -31,7 +31,7 @@ export class StartServerCommand {
     const intentFileConfig =
       this.configurationLoader.load(intentConfigFilePath);
 
-    const tsConfig = this.tsConfigLoader.load(tsconfig);
+    const tsConfig = this.tsConfigLoader.load(tsConfigPath);
 
     const extraOptions: ExtraOptions = {
       watch,
@@ -53,7 +53,7 @@ export class StartServerCommand {
     );
 
     await this.swcFileTransformer.run(
-      tsConfig,
+      tsConfigPath,
       swcOptions,
       extraOptions,
       onSuccessHook

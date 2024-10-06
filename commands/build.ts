@@ -15,14 +15,14 @@ export class BuildCommand {
       debug = false,
       disableTypeCheck,
       path,
-      tsconfig,
+      tsconfig: tsConfigPath,
     } = options;
 
     const intentConfigFilePath = this.configurationLoader.loadPath(path);
     const intentFileConfig =
       this.configurationLoader.load(intentConfigFilePath);
 
-    const tsConfig = this.tsConfigLoader.load(tsconfig);
+    const tsConfig = this.tsConfigLoader.load(tsConfigPath);
 
     const extraOptions = {
       watch,
@@ -36,6 +36,6 @@ export class BuildCommand {
       extraOptions
     );
 
-    await this.swcFileTransformer.run(tsConfig, swcOptions, extraOptions);
+    await this.swcFileTransformer.run(tsConfigPath, swcOptions, extraOptions);
   }
 }

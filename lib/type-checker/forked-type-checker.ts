@@ -9,15 +9,12 @@ export class ForkedTypeCheckerHost {
 
   run(tsConfigPath: string, extras: ExtraOptions) {
     const onTypeCheckFunction = (program: ts.Program) => {
-      console.log("function running ===> ");
       const diagnostics = ts.getPreEmitDiagnostics(program);
       const formatDiagnosticsHost: ts.FormatDiagnosticsHost = {
         getCanonicalFileName: (path) => path,
         getCurrentDirectory: ts.sys.getCurrentDirectory,
         getNewLine: () => ts.sys.newLine,
       };
-
-      console.log(formatDiagnosticsHost);
 
       console.log(
         ts.formatDiagnosticsWithColorAndContext(

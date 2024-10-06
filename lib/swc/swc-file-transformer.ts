@@ -17,7 +17,7 @@ export class SwcFileTransformer {
   typeCheckerHost = new TypeCheckerHost();
 
   async run(
-    tsConfig: Record<string, any>,
+    tsConfigPath: string,
     options: ReturnType<typeof defaultSwcOptionsFactory>,
     extras: ExtraOptions,
     onSuccessHook?: () => void
@@ -27,10 +27,10 @@ export class SwcFileTransformer {
         await this.runTypeCheck(extras);
       }
 
-      await this.transformFiles(tsConfig, options, extras);
+      await this.transformFiles(tsConfigPath, options, extras);
 
       const delayedOnChange = debounce({ delay: 150 }, () => {
-        this.transformFiles(tsConfig, options, extras);
+        this.transformFiles(tsConfigPath, options, extras);
         onSuccessHook && onSuccessHook();
       });
 
@@ -39,13 +39,13 @@ export class SwcFileTransformer {
         debouncedSuccess();
       }
 
-      this.watchIncludedFiles(tsConfig, delayedOnChange);
+      this.watchIncludedFiles(tsConfigPath, delayedOnChange);
     } else {
       if (extras.typeCheck) {
         await this.runTypeCheck(extras);
       }
 
-      await this.transformFiles(tsConfig, options, extras);
+      await this.transformFiles(tsConfigPath, options, extras);
     }
   }
 
@@ -77,11 +77,12 @@ export class SwcFileTransformer {
   }
 
   async transformFiles(
-    tsConfig: Record<string, any>,
+    tsConfigPath: string,
     options: ReturnType<typeof defaultSwcOptionsFactory>,
     extras: ExtraOptions
   ) {
     const now = Date.now();
+    const tsConfig = this.tsConfigLoader.load(tsConfigPath);
     const { include = [] } = tsConfig;
     const fileTransformationPromises = [];
 
@@ -122,7 +123,8 @@ export class SwcFileTransformer {
     );
   }
 
-  watchIncludedFiles(tsConfig: Record<string, any>, onChange: () => void) {
+  watchIncludedFiles(tsConfigPath: string, onChange: () => void) {
+    const tsConfig = this.tsConfigLoader.load(tsConfigPath);
     const watcher = chokidar.watch(
       tsConfig.includeDirs.map((dir: string) => join(dir, "**/*.ts")),
       {
